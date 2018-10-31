@@ -54,7 +54,7 @@ ROOT_URLCONF = 'chicode.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',
         'DIRS': ['/chicode/chicode/templates'],
         'APP_DIRS': False,
         'OPTIONS': {
@@ -63,6 +63,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+            ],
+            "extensions": [
+                "webpack_loader.contrib.jinja2ext.WebpackExtension",
             ],
         },
     },
@@ -124,3 +127,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/2.1/topics/auth/customizing/#substituting-a-custom-user-model
 
 AUTH_USER_MODEL = 'users.User'
+
+# Webpack loader
+# https://github.com/owais/django-webpack-loader
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'assets'), )
