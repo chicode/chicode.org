@@ -2,7 +2,9 @@
     <head>
         <title>Chicode</title>
         <link href='https://fonts.googleapis.com/css?family=' rel='stylesheet' type='text/css'>
-        {{ render_bundle('main') }}
+        {% compress css %}
+        <link href="{{ static('main.scss') }}"  type="text/x-scss" rel="stylesheet">
+        {% endcompress %}
     </head>
     <body>
         {% block content %}{% endblock %}

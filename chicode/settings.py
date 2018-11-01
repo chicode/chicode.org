@@ -19,10 +19,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4$kit=h-i$$j1rxyi6-txc0_vcj6-q6eyze$lxi$gxv*a9jkl5'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['DEBUG']
 
 ALLOWED_HOSTS = []
 
@@ -52,7 +52,21 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'chicode.urls'
 
+# two templates because https://github.com/django-compressor/django-compressor/issues/637
 TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
     {
         'BACKEND': 'django.template.backends.jinja2.Jinja2',
         'DIRS': ['/chicode/chicode/templates'],
@@ -64,9 +78,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            "extensions": [
-                "webpack_loader.contrib.jinja2ext.WebpackExtension",
-            ],
+            'extensions': [],
+            'environment':
+            'chicode.jinja2.environment'
         },
     },
 ]
@@ -122,13 +136,31 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Custom User model
 # https://docs.djangoproject.com/en/2.1/topics/auth/customizing/#substituting-a-custom-user-model
 
 AUTH_USER_MODEL = 'users.User'
 
-# Webpack loader
-# https://github.com/owais/django-webpack-loader
+# Django compressor
+# https://github.com/Fueled/django-init/wiki/SASS-support-using-django-compressor
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'assets'), )
+INSTALLED_APPS.append('compressor')
+
+COMPRESS_CSS_FILTERS = ('compressor.filters.cssmin.CSSMinFilter', )
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_PRECOMPILERS = (('text/x-scss', 'django_libsass.SassCompiler'), )
+
+TEMPLATES[1]['OPTIONS']['extensions'].append(
+    'compressor.contrib.jinja2ext.CompressorExtension'
+)
+
+# For some reason this comment is necessary
+LIBSASS_SOURCE_COMMENTS = True
